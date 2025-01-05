@@ -5,6 +5,8 @@ import {
   TStudent,
   TUserName,
 } from './student.interface';
+import AppError from '../../errors/AppErrors';
+import httpStatus from 'http-status';
 
 const userNameSchema = new Schema<TUserName>({
   firstName: {
@@ -138,6 +140,10 @@ const studentSchema = new Schema<TStudent>(
       required: [true, 'Academic Semester is required'],
       ref: 'AcademicSemester',
     },
+    academicDepartment: {
+      type: Schema.Types.ObjectId,
+      ref: 'AcademicDepartment',
+    },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -149,5 +155,21 @@ const studentSchema = new Schema<TStudent>(
     },
   },
 );
+
+// virtual
+studentSchema.virtual('fullName').get(function () {
+  return `${this.name.firstName} ${this.name.middleName} ${this.name.lastName}`;
+});
+
+// Query Middleware
+studentSchema.pre('find', function (next) {
+  this.find({ isDeleted: { $ne: true } });
+  next();
+});
+
+studentSchema.pre('findOne', function (next) {
+  this.find({ isDeleted: { $ne: true } });
+  next();
+});
 
 export const Student = model<TStudent>('Student', studentSchema);
