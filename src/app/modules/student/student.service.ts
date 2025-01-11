@@ -1,4 +1,4 @@
-import mongoose, { Query } from 'mongoose';
+import mongoose from 'mongoose';
 import { Student } from './student.model';
 import AppError from '../../errors/AppErrors';
 import httpStatus from 'http-status';
@@ -66,7 +66,7 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
     .search(studentSearchableFields)
     .filter()
     .sort()
-    .pagiknate()
+    .paginate()
     .fields();
 
   const result = await studentQuery.modelQuery;
@@ -74,7 +74,7 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
 };
 
 const getSingleStudentFromDB = async (id: string) => {
-  const result = await Student.findOne({ id })
+  const result = await Student.findById(id)
     .populate('academicSemester')
     .populate({
       path: 'academicDepartment',
@@ -83,8 +83,12 @@ const getSingleStudentFromDB = async (id: string) => {
   return result;
 };
 
-const updateStudentFromDB = async (id: string, payLoad: Partial<TStudent>) => {
-  const { name, guardian, localGuardian, ...remainingStudentData } = payLoad;
+const updateStudentFromDB = async (
+  id: string,
+  studentData: Partial<TStudent>,
+) => {
+  const { name, guardian, localGuardian, ...remainingStudentData } =
+    studentData;
 
   const modifiedUpdatedData: Record<string, unknown> = {
     ...remainingStudentData,
@@ -108,7 +112,7 @@ const updateStudentFromDB = async (id: string, payLoad: Partial<TStudent>) => {
     }
   }
 
-  const result = await Student.findOneAndUpdate({ id }, modifiedUpdatedData, {
+  const result = await Student.findByIdAndUpdate(id, modifiedUpdatedData, {
     new: true,
     runValidators: true,
   });
@@ -122,8 +126,8 @@ const deleteStudentFromDB = async (id: string) => {
     session.startTransaction();
 
     //  set isDeleted as true in student (transaction 1)
-    const deletedStudent = await Student.findOneAndUpdate(
-      { id },
+    const deletedStudent = await Student.findByIdAndUpdate(
+      id,
       { $set: { isDeleted: true } },
       { new: true, session },
     );
@@ -132,8 +136,11 @@ const deleteStudentFromDB = async (id: string) => {
       throw new AppError(httpStatus.BAD_REQUEST, 'Failed to delete student');
     }
 
-    const deletedUser = await User.findOneAndUpdate(
-      { id },
+    // get user id from deletedStudent
+    const userId = deletedStudent.user;
+
+    const deletedUser = await User.findByIdAndUpdate(
+      userId,
       { $set: { isDeleted: true } },
       { new: true, session },
     );
