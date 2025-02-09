@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { TErrorSources, TGenericErrorResponse } from '../interface/error';
 
 const handleDuplicateError = (err: any): TGenericErrorResponse => {
@@ -6,7 +7,7 @@ const handleDuplicateError = (err: any): TGenericErrorResponse => {
   const errorSources: TErrorSources = [
     {
       path: '',
-      message: `${extractedMessage} iks already exists`,
+      message: `${extractedMessage} is already exists`,
     },
   ];
 
