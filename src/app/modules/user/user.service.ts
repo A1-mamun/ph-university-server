@@ -18,6 +18,7 @@ import { AcademicDepartment } from '../academicDepartment/academicDepartment.mod
 import { Faculty } from '../faculty/faculty.model';
 import { Admin } from '../admin/admin.model';
 import { sendImageToCloudinary } from '../../utils/sendImageToCloudinary';
+import { TAdmin } from '../admin/admin.interface';
 
 const createStudentIntoDB = async (
   file: any,
@@ -172,7 +173,7 @@ const createFacultyIntoDB = async (
 const createAdminIntoDB = async (
   file: any,
   password: string,
-  adminData: TFaculty,
+  adminData: TAdmin,
 ) => {
   // create a user object
   const userData: Partial<TUser> = {};

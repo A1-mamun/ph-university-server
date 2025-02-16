@@ -8,60 +8,11 @@ import QueryBuilder from '../../builder/QueryBuilder';
 import { studentSearchableFields } from './student.constant';
 
 const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
-  // const queryObj = { ...query };
-  // let searchTerm = '';
-  // if (query?.searchTerm) {
-  //   searchTerm = query?.searchTerm as string;
-  // }
-  // const studentSearchableFields = ['email', 'name.firstName', 'name.lastName'];
-  // const searchQuery = Student.find({
-  //   $or: studentSearchableFields.map((field) => ({
-  //     [field]: { $regex: searchTerm, $options: 'i' },
-  //   })),
-  // });
-  // filtering
-  // const excludeFilelds = ['searchTerm', 'sort', 'limit', 'page', 'fields'];
-  // excludeFilelds.forEach((field) => delete queryObj[field]);
-  // const filterQuery = searchQuery
-  //   .find(queryObj)
-  // .populate('academicSemester')
-  // .populate({
-  //   path: 'academicDepartment',
-  //   populate: { path: 'academicFaculty' },
-  // });
-  // let sort = '-createdAt';
-  // if (query?.sort) {
-  //   sort = query?.sort as string;
-  // }
-  // const sortQuery = filterQuery.sort(sort);
-  // let page = 1;
-  // let limit = 1;
-  // let skip = 0;
-  // if (query?.limit) {
-  //   limit = query?.limit as number;
-  // }
-  // if (query?.page) {
-  //   page = query?.page as number;
-  //   skip = (page - 1) * limit;
-  // }
-  // const paginationQuery = sortQuery.skip(skip);
-  // const limitQuery = paginationQuery.limit(limit);
-  // // field limiting
-  // let fields = '-__v';
-  // if (query?.fields) {
-  //   fields = (query?.fields as string).split(',').join(' ');
-  //   console.log(fields);
-  // }
-  // const fieldQuery = await limitQuery.select(fields);
-  // return fieldQuery;
   const studentQuery = new QueryBuilder(
     Student.find()
       .populate('user')
-      .populate('academicSemester')
-      .populate({
-        path: 'academicDepartment',
-        populate: { path: 'academicFaculty' },
-      }),
+      .populate('admissionSemester')
+      .populate('academicDepartment academicFaculty'),
     query,
   )
     .search(studentSearchableFields)
@@ -70,8 +21,13 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
     .paginate()
     .fields();
 
+  const meta = await studentQuery.countTotal();
   const result = await studentQuery.modelQuery;
-  return result;
+
+  return {
+    meta,
+    result,
+  };
 };
 
 const getSingleStudentFromDB = async (id: string) => {

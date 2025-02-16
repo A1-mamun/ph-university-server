@@ -66,6 +66,7 @@ const auth = (...requiredRole: TUserRole[]) => {
 
     // decoded value
     req.user = decoded as JwtPayload;
+    // console.log('req.user', req.user);
     next();
   });
 };

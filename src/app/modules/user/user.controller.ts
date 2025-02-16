@@ -40,7 +40,7 @@ const createFaculty = catchAsync(async (req, res) => {
 const createAdmin = catchAsync(async (req, res) => {
   const { password, admin: adminData } = req.body;
 
-  const result = await UserServices.createFacultyIntoDB(
+  const result = await UserServices.createAdminIntoDB(
     req.file,
     password,
     adminData,
